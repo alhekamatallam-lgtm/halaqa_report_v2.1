@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="https://i.ibb.co/ZzqqtpZQ/1-page-001-removebg-preview.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تقرير الحلقة التفاعلي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #f5f5f4; /* fallback */
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d6d3d1' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+      @keyframes slide-in {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .animate-slide-in {
+        animation: slide-in 0.5s ease-out forwards;
+      }
+      /* Global transitions for smoother UI */
+      .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+      }
+      .transition-colors {
+        transition-property: background-color, border-color, color, fill, stroke, opacity;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+      }
+      
+      /* Print Styles */
+      @media print {
+        @page {
+          size: landscape;
+          margin: 1cm;
+        }
+        /* --- GENERAL PRINT SETUP --- */
+        body {
+          background-image: none !important;
+          background-color: white !important;
+          font-size: 10pt;
+          counter-reset: pageCounter;
+        }
+        .print-hidden {
+          display: none !important;
+        }
+        tr {
+          page-break-inside: avoid;
+        }
+
+        /* --- SPECIAL STUDENT REPORT PRINT (triggered by body class) --- */
+        body.student-print-active > #root {
+          display: none !important;
+        }
+        .printable-student-report {
+          display: block !important;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .printable-student-report .page-break:last-child {
+            page-break-after: auto;
+        }
+        .print-header-container {
+          border: none !important;
+          padding: 0 0 1rem 0 !important;
+        }
+        .print-header {
+            text-align: center;
+            margin-bottom: 0; /* Adjusted from 1.5rem */
+        }
+        .print-header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 0;
+        }
+        .print-header h2 {
+            font-size: 14pt;
+            font-weight: normal;
+            margin: 0.25rem 0;
+        }
+        .print-header p {
+            font-size: 10pt;
+            color: #555;
+            margin: 0;
+        }
+        .print-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          font-size: 9pt;
+        }
+        .print-table thead {
+          display: table-header-group;
+          background-color: #e2e8f0 !important;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        .print-table tfoot {
+          display: table-footer-group;
+        }
+        .print-table th, .print-table td {
+          border: 1px solid #9ca3af !important;
+          padding: 6px !important;
+          text-align: center;
+          color: black !important;
+          vertical-align: middle;
+        }
+        .print-table tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        .print-progress-container {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #e5e7eb !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 4px;
+            height: 8px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .print-progress-bar {
+            height: 100%;
+            background-color: #3b82f6 !important;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        .print-achievement-text {
+            font-size: 9pt;
+            font-weight: bold;
+        }
+        .print-progress-percentage {
+            font-size: 8pt;
+            text-align: center;
+            margin-top: 2px;
+            font-weight: bold;
+            color: #333 !important;
+        }
+        .print-page-footer {
+          text-align: center;
+          font-size: 9pt;
+          color: #555;
+          font-weight: bold;
+          border-top: 1px solid #9ca3af !important;
+        }
+        .page-number::before {
+          counter-increment: pageCounter;
+          content: counter(pageCounter);
+        }
+
+        /* --- DEFAULT REPORT PRINT (Teacher Attendance, etc.) --- */
+        body:not(.student-print-active) main,
+        body:not(.student-print-active) .printable-area {
+          padding: 0 !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+        body:not(.student-print-active) table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          font-size: 9pt;
+        }
+        body:not(.student-print-active) thead {
+          background-color: #f2f2f2 !important;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        body:not(.student-print-active) th, 
+        body:not(.student-print-active) td {
+          border: 1px solid #ccc !important;
+          padding: 6px !important;
+          color: black !important;
+        }
+        
+        .absent-row-print {
+          background-color: #e5e5e5 !important;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        .print-title {
+          display: block !important;
+          text-align: center;
+          font-size: 16pt;
+          font-weight: bold;
+          margin-bottom: 20px;
+        }
+      }
+      .print-title {
+        display: none;
+      }
+      .printable-student-report {
+        display: none;
+      }
+    </style>
+  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-stone-100 text-stone-800">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
